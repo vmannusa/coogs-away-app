@@ -1,46 +1,365 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coogs Away Game Hub</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#C8102E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Coogs Away</title>
+<style>
+  :root { --red:#C8102E; --dark:#7a0a1c; --ink:#fff; --silver:#c7c9cc; --bg:#141414; --card:#1f1f1f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  body { display:flex; flex-direction:column; min-height:100dvh; padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom); }
+  header { display:flex; align-items:center; justify-content:space-between; padding:12px 0; }
+  header h1 { font-size:20px; margin:0; letter-spacing:.5px; }
+  header h1 span { color:var(--red); }
+  .iconbtn { background:none; border:1px solid #444; color:var(--ink); border-radius:10px; padding:8px 12px; font-size:16px; }
+  .hidden { display:none !important; }
+
+  /* start */
+  #start { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:18px; }
+  #start p { color:var(--silver); max-width:320px; margin:0; line-height:1.4; }
+
+  /* board */
+  #board { flex:1; display:flex; flex-direction:column; gap:14px; }
+  .status { text-align:center; color:var(--silver); font-size:15px; min-height:20px; }
+  .scores { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .team { background:var(--card); border-radius:18px; padding:16px 10px; text-align:center; }
+  .team.uh { background:var(--red); }
+  .team img { width:44px; height:44px; object-fit:contain; }
+  .team .abbr { font-weight:700; font-size:18px; margin-top:4px; }
+  .team .pts { font-size:72px; font-weight:800; line-height:1; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .note { text-align:center; font-size:15px; color:#ffd166; min-height:20px; }
+  .updated { text-align:center; font-size:12px; color:#888; }
+
+  .go { margin-top:auto; width:100%; border:none; border-radius:22px; padding:28px 10px; font-size:40px; font-weight:900;
+        letter-spacing:1px; color:#fff; background:var(--dark); text-transform:uppercase; }
+  .go.ready { background:var(--red); animation:pulse 1s infinite; box-shadow:0 0 0 0 rgba(200,16,46,.7); }
+  .go small { display:block; font-size:16px; font-weight:600; opacity:.85; letter-spacing:0; text-transform:none; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(200,16,46,.7)} 70%{box-shadow:0 0 0 22px rgba(200,16,46,0)} 100%{box-shadow:0 0 0 0 rgba(200,16,46,0)} }
+  .row { display:flex; gap:10px; }
+  .btn { flex:1; border:1px solid #444; background:var(--card); color:var(--ink); border-radius:14px; padding:14px; font-size:16px; font-weight:600; }
+  .btn.primary { background:var(--red); border-color:var(--red); }
+  .bottom-pad { height:12px; }
+
+  /* celebration overlay */
+  #celebrate { position:fixed; inset:0; background:var(--red); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; }
+  #celebrate .label { font-size:26px; font-weight:800; text-transform:uppercase; letter-spacing:2px; }
+  #celebrate .count { font-size:min(52vw,280px); font-weight:900; line-height:1; font-variant-numeric:tabular-nums; }
+  #celebrate .of { font-size:20px; opacity:.85; }
+  #celebrate .stop { position:absolute; bottom:calc(24px + env(safe-area-inset-bottom)); left:16px; right:16px; }
+  #celebrate .count.bump { animation:bump .18s ease-out; }
+  @keyframes bump { from{transform:scale(1.18)} to{transform:scale(1)} }
+
+  /* settings */
+  #settings { position:fixed; inset:0; background:var(--bg); z-index:20; overflow:auto; padding:env(safe-area-inset-top) 16px 40px; }
+  #settings h2 { margin:16px 0 8px; font-size:20px; }
+  .field { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; }
+  .field label { display:block; font-weight:600; margin-bottom:6px; }
+  .field .hint { color:#999; font-size:13px; margin-top:6px; line-height:1.35; }
+  input[type=range] { width:100%; }
+  input[type=number], select { width:100%; font-size:18px; padding:10px; border-radius:10px; border:1px solid #444; background:#111; color:#fff; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+</style>
 </head>
 <body>
-    <header class="cougar-header">
-        <h1>Coogs Away Game Hub</h1>
-    </header>
-    <main>
-        <section class="card pushup-tracker">
-            <h2>Shasta Push-Up Counter</h2>
-            <div class="score-display">
-                <span class="team">HOU: <span id="hou-score">0</span></span>
-                <span class="team">OPP: <span id="opp-score">0</span></span>
-            </div>
-            <div class="pushup-total">
-                <p>Total Push-Ups Today:</p>
-                <h3 id="pushup-count">0</h3>
-            </div>
-        </section>
-        <section class="card traditions">
-            <h2>Traditions</h2>
-            <button id="play-fight-song">Play Fight Song</button>
-            <details>
-                <summary>Alma Mater Lyrics</summary>
-                <p>All hail to thee, our Houston University...</p>
-            </details>
-        </section>
-        <section class="card tailgate-checklist">
-            <h2>Tailgate Operations</h2>
-            <ul id="checklist">
-                <li><input type="checkbox" id="item-trailer"> <label for="item-trailer">Trailer hooked up</label></li>
-                <li><input type="checkbox" id="item-gas"> <label for="item-gas">Gas for generator</label></li>
-                <li><input type="checkbox" id="item-cooler"> <label for="item-cooler">Cooler & Ice</label></li>
-                <li><input type="checkbox" id="item-drinks"> <label for="item-drinks">Root beers & White Claws</label></li>
-                <li><input type="checkbox" id="item-food"> <label for="item-food">Shipley's & Chick-fil-A</label></li>
-            </ul>
-        </section>
-    </main>
-    <script type="module" src="js/app.js"></script>
+<header>
+  <h1>COOGS <span>AWAY</span></h1>
+  <button class="iconbtn" id="openSettings" aria-label="Settings">⚙︎ Settings</button>
+</header>
+
+<section id="start">
+  <div style="font-size:64px">🐾</div>
+  <p>Connect your Bluetooth speaker, turn the volume up, and turn off silent mode.</p>
+  <button class="go ready" id="startBtn" style="margin-top:0">Game Time</button>
+  <p id="songWarn" class="hidden" style="color:#ffd166">No fight song picked yet. Add one in Settings (the count still works without it).</p>
+</section>
+
+<section id="board" class="hidden">
+  <div class="status" id="status">Finding today's game…</div>
+  <div class="scores">
+    <div class="team uh"><img id="uhLogo" alt=""><div class="abbr">HOU</div><div class="pts" id="uhPts">–</div></div>
+    <div class="team"><img id="oppLogo" alt=""><div class="abbr" id="oppAbbr">OPP</div><div class="pts" id="oppPts">–</div></div>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="updated" id="updated"></div>
+  <button class="go" id="goBtn">Go Coogs<small id="goSub">Plays the song + counts 0</small></button>
+  <div class="row">
+    <button class="btn" id="refreshBtn">↻ Refresh</button>
+    <button class="btn" id="testBtn">Test (count 7)</button>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<section id="celebrate" class="hidden">
+  <div class="label" id="celLabel">Go Coogs!</div>
+  <div class="count" id="celCount">🎺</div>
+  <div class="of" id="celOf"></div>
+  <button class="btn stop" id="stopBtn" style="background:#000;border-color:#000;flex:none">Stop</button>
+</section>
+
+<section id="settings" class="hidden">
+  <header style="padding-top:12px"><h1>Settings</h1><button class="iconbtn" id="closeSettings">Done</button></header>
+
+  <div class="field">
+    <label>Fight song</label>
+    <input type="file" id="songFile" accept="audio/*">
+    <div class="hint" id="songName">No song saved.</div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="previewSong">▶ Preview</button><button class="btn" id="clearSong">Remove</button></div>
+  </div>
+
+  <div class="field">
+    <label>Song length: <span id="clipVal"></span></label>
+    <input type="range" id="clip" min="0" max="120" step="5">
+    <div class="hint">How many seconds of the song to play before the count. 0 = whole song. You can tap Stop anytime.</div>
+  </div>
+
+  <div class="field">
+    <label>Count speed: <span id="tempoVal"></span></label>
+    <input type="range" id="tempo" min="300" max="1200" step="50">
+    <div class="hint">Time between each dink.</div>
+  </div>
+
+  <div class="field">
+    <label>Dink sound</label>
+    <select id="sound">
+      <option value="cowbell">Cowbell</option>
+      <option value="bell">Bell / glock</option>
+      <option value="drum">Drum hit</option>
+    </select>
+    <div class="row" style="margin-top:8px"><button class="btn" id="previewDink">▶ Try it</button></div>
+  </div>
+
+  <div class="field">
+    <label>Fix the score manually</label>
+    <div class="two">
+      <input type="number" id="manUh" inputmode="numeric" placeholder="UH">
+      <input type="number" id="manOpp" inputmode="numeric" placeholder="Opp">
+    </div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="applyMan">Set score</button><button class="btn" id="clearMan">Back to live</button></div>
+    <div class="hint">Only needed if ESPN is down or behind. "Back to live" resumes auto-updates.</div>
+  </div>
+
+  <div class="field">
+    <label>Check for score every: <span id="pollVal"></span></label>
+    <input type="range" id="poll" min="10" max="60" step="5">
+  </div>
+</section>
+
+<script>
+(() => {
+  const TEAM = new URLSearchParams(location.search).get('team') || '248'; // Houston Cougars on ESPN
+  const API = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football';
+  const $ = id => document.getElementById(id);
+
+  // ---------- settings ----------
+  const DEF = { clip: 30, tempo: 600, sound: 'cowbell', poll: 15 };
+  let cfg = { ...DEF };
+  try { cfg = { ...DEF, ...JSON.parse(localStorage.getItem('coogs.cfg') || '{}') }; } catch {}
+  const saveCfg = () => { try { localStorage.setItem('coogs.cfg', JSON.stringify(cfg)); } catch {} };
+
+  // ---------- state ----------
+  let st = { eventId:null, uh:null, opp:null, lastCelebrated:null, manual:null, lastBump:null };
+  try { st = { ...st, ...JSON.parse(localStorage.getItem('coogs.state') || '{}') }; } catch {}
+  const saveSt = () => { try { localStorage.setItem('coogs.state', JSON.stringify(st)); } catch {} };
+
+  // ---------- IndexedDB for song ----------
+  const idb = () => new Promise((res, rej) => {
+    const r = indexedDB.open('coogs', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('files');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  async function idbPut(k, v) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('files','readwrite'); t.objectStore('files').put(v,k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+  async function idbGet(k) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('files').objectStore('files').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+  async function idbDel(k) { const db = await idb(); return new Promise(res => { const t = db.transaction('files','readwrite'); t.objectStore('files').delete(k); t.oncomplete = res; }); }
+
+  // ---------- audio ----------
+  let ctx = null, songBuf = null, playing = [], cancelled = false, timers = [];
+  function ensureCtx() {
+    if (!ctx) {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  async function loadSong() {
+    try {
+      const rec = await idbGet('song');
+      if (!rec) { songBuf = null; $('songName').textContent = 'No song saved.'; return; }
+      $('songName').textContent = 'Saved: ' + rec.name;
+      if (ctx) songBuf = await ctx.decodeAudioData(await rec.blob.arrayBuffer());
+    } catch (e) { console.warn(e); $('songName').textContent = 'Could not load saved song: ' + e.message; }
+  }
+  function dink(t) {
+    const c = ensureCtx(), out = c.createGain(); out.connect(c.destination);
+    const s = cfg.sound;
+    if (s === 'drum') {
+      const o = c.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(55, t + .15);
+      out.gain.setValueAtTime(1, t); out.gain.exponentialRampToValueAtTime(.001, t + .3);
+      o.connect(out); o.start(t); o.stop(t + .32); playing.push(o);
+      const n = c.createBufferSource(), b = c.createBuffer(1, c.sampleRate * .08, c.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+      n.buffer = b; const ng = c.createGain(); ng.gain.value = .5; n.connect(ng).connect(c.destination); n.start(t); playing.push(n);
+    } else if (s === 'bell') {
+      [1, 2.76, 5.4].forEach((m, i) => {
+        const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = 1046 * m;
+        g.gain.setValueAtTime(.5 / (i+1), t); g.gain.exponentialRampToValueAtTime(.001, t + .6 / (i+1));
+        o.connect(g).connect(out); o.start(t); o.stop(t + .7); playing.push(o);
+      });
+      out.gain.value = .9;
+    } else { // cowbell (classic 2-square-wave recipe)
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2640; bp.Q.value = 1.2;
+      bp.connect(out);
+      [587, 845].forEach(f => { const o = c.createOscillator(); o.type = 'square'; o.frequency.value = f; o.connect(bp); o.start(t); o.stop(t + .4); playing.push(o); });
+      out.gain.setValueAtTime(.0001, t); out.gain.exponentialRampToValueAtTime(1, t + .004);
+      out.gain.exponentialRampToValueAtTime(.25, t + .06); out.gain.exponentialRampToValueAtTime(.001, t + .38);
+    }
+  }
+  function stopAll() {
+    cancelled = true;
+    playing.forEach(n => { try { n.stop(); } catch {} }); playing = [];
+    timers.forEach(clearTimeout); timers = [];
+    $('celebrate').classList.add('hidden');
+  }
+
+  async function celebrate(points) {
+    stopAll(); cancelled = false;
+    const c = ensureCtx();
+    if (!songBuf) await loadSong();
+    $('celebrate').classList.remove('hidden');
+    $('celLabel').textContent = 'Go Coogs!'; $('celCount').textContent = '🎺'; $('celOf').textContent = '';
+    let t0 = c.currentTime + .1, songLen = 0;
+    if (songBuf) {
+      const src = c.createBufferSource(), g = c.createGain(); src.buffer = songBuf; src.connect(g).connect(c.destination);
+      songLen = cfg.clip > 0 ? Math.min(cfg.clip, songBuf.duration) : songBuf.duration;
+      if (cfg.clip > 0 && cfg.clip < songBuf.duration) { g.gain.setValueAtTime(1, t0 + songLen - 1.5); g.gain.linearRampToValueAtTime(0, t0 + songLen); }
+      src.start(t0, 0, songLen + .05); playing.push(src);
+      songLen += .6;
+    }
+    const step = cfg.tempo / 1000, countStart = t0 + songLen;
+    timers.push(setTimeout(() => { if (!cancelled) { $('celLabel').textContent = 'Push-ups'; $('celCount').textContent = '0'; $('celOf').textContent = 'of ' + points; } }, (countStart - c.currentTime) * 1000 - 300));
+    for (let i = 1; i <= points; i++) {
+      const at = countStart + (i - 1) * step;
+      dink(at);
+      timers.push(setTimeout(() => { if (cancelled) return; const el = $('celCount'); el.textContent = i; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }, (at - c.currentTime) * 1000));
+    }
+    const end = countStart + Math.max(points - 1, 0) * step + 1.6;
+    timers.push(setTimeout(() => { if (!cancelled) { $('celLabel').textContent = points + ' push-ups!'; } }, (end - 1.4 - c.currentTime) * 1000));
+    timers.push(setTimeout(() => { if (!cancelled) $('celebrate').classList.add('hidden'); }, (end + 1.5 - c.currentTime) * 1000));
+  }
+
+  // ---------- wake lock ----------
+  let lock = null;
+  async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') lock = await navigator.wakeLock.request('screen'); } catch {} }
+
+  // ---------- ESPN ----------
+  async function getJSON(u) { const r = await fetch(u + (u.includes('?') ? '&' : '?') + '_=' + Date.now()); if (!r.ok) throw new Error('ESPN ' + r.status); return r.json(); }
+  async function pickEvent() {
+    const s = await getJSON(`${API}/teams/${TEAM}/schedule`);
+    const now = Date.now(), evs = s.events || [];
+    const live = evs.find(e => e.competitions[0].status.type.state === 'in');
+    if (live) return live.id;
+    // game today (within 18h window either way), otherwise next upcoming, otherwise most recent
+    const near = evs.map(e => ({ id:e.id, d:Math.abs(new Date(e.date) - now), t:new Date(e.date) - now }))
+                    .sort((a, b) => a.d - b.d);
+    const today = near.find(x => x.d < 18 * 3600e3);
+    if (today) return today.id;
+    const next = near.filter(x => x.t > 0).sort((a, b) => a.t - b.t)[0];
+    return (next || near[0] || {}).id;
+  }
+  let pollTimer = null, busy = false;
+  async function poll() {
+    if (busy) return; busy = true;
+    try {
+      if (!st.eventId || !(await eventStillRelevant())) {
+        const id = await pickEvent();
+        if (id !== st.eventId) { st = { ...st, eventId:id, uh:null, opp:null, lastCelebrated:null, lastBump:null, manual:null }; saveSt(); }
+      }
+      if (!st.eventId) { $('status').textContent = 'No game found on the schedule.'; return; }
+      const sm = await getJSON(`${API}/summary?event=${st.eventId}`);
+      const comp = sm.header.competitions[0];
+      const uh = comp.competitors.find(c => c.id === TEAM), opp = comp.competitors.find(c => c.id !== TEAM);
+      const status = comp.status || {}, ty = status.type || {};
+      $('uhLogo').src = (uh.team.logos || [{}])[0].href || '';
+      $('oppLogo').src = (opp.team.logos || [{}])[0].href || '';
+      $('oppAbbr').textContent = opp.team.abbreviation || 'OPP';
+      const when = ty.state === 'pre' ? new Date(comp.date).toLocaleString([], { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+      $('status').textContent = `${uh.homeAway === 'away' ? '@' : 'vs'} ${opp.team.displayName} · ${ty.state === 'pre' ? 'Kickoff ' + when : (ty.shortDetail || ty.detail || '')}`;
+      if (st.manual) { render(); return; }
+      const newUh = parseInt(uh.score || '0', 10) || 0, newOpp = parseInt(opp.score || '0', 10) || 0;
+      if (st.uh !== null && newUh > st.uh) st.lastBump = { by: newUh - st.uh, at: Date.now() };
+      if (st.lastCelebrated === null) st.lastCelebrated = newUh; // don't flag old points on first load
+      st.uh = newUh; st.opp = newOpp; saveSt();
+      $('updated').textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' });
+      render();
+    } catch (e) {
+      $('updated').textContent = 'Could not reach ESPN (' + e.message + '). Retrying…';
+    } finally { busy = false; }
+  }
+  let relevantCheckedAt = 0;
+  async function eventStillRelevant() {
+    if (Date.now() - relevantCheckedAt < 30 * 60e3) return true; // re-pick game every 30 min
+    relevantCheckedAt = Date.now(); return false;
+  }
+  function schedule() { clearInterval(pollTimer); pollTimer = setInterval(poll, cfg.poll * 1000); }
+
+  function score() { return st.manual ? st.manual.uh : (st.uh ?? 0); }
+  function render() {
+    const u = score(), o = st.manual ? st.manual.opp : st.opp;
+    $('uhPts').textContent = u ?? '–'; $('oppPts').textContent = o ?? '–';
+    $('goSub').textContent = `Plays the song + counts ${u}`;
+    const fresh = st.lastCelebrated !== null && u > st.lastCelebrated;
+    $('goBtn').classList.toggle('ready', fresh);
+    let note = '';
+    if (fresh) note = '🐾 UH SCORED! Hit GO COOGS';
+    if (st.lastBump && st.lastBump.by === 6 && Date.now() - st.lastBump.at < 90e3) note = '⏳ Touchdown! Waiting on the extra point…';
+    if (st.manual) note = (note ? note + ' · ' : '') + 'Manual score (live paused)';
+    $('note').textContent = note;
+  }
+
+  // ---------- wiring ----------
+  $('startBtn').onclick = async () => {
+    ensureCtx(); keepAwake();
+    $('start').classList.add('hidden'); $('board').classList.remove('hidden');
+    loadSong(); await poll(); schedule();
+  };
+  $('goBtn').onclick = () => { const p = score(); st.lastCelebrated = p; st.lastBump = null; saveSt(); render(); celebrate(p); };
+  $('testBtn').onclick = () => celebrate(7);
+  $('stopBtn').onclick = stopAll;
+  $('refreshBtn').onclick = () => { relevantCheckedAt = 0; poll(); };
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !$('board').classList.contains('hidden')) { keepAwake(); poll(); } });
+  setInterval(render, 5000);
+
+  // settings
+  const fmtClip = v => v == 0 ? 'Whole song' : v + 's';
+  const bindRange = (id, key, fmt) => { const el = $(id); el.value = cfg[key]; $(id + 'Val').textContent = fmt(cfg[key]);
+    el.oninput = () => { cfg[key] = +el.value; $(id + 'Val').textContent = fmt(cfg[key]); saveCfg(); if (key === 'poll') schedule(); }; };
+  bindRange('clip', 'clip', fmtClip); bindRange('tempo', 'tempo', v => (v/1000).toFixed(2) + 's'); bindRange('poll', 'poll', v => v + 's');
+  $('sound').value = cfg.sound; $('sound').onchange = () => { cfg.sound = $('sound').value; saveCfg(); };
+  $('previewDink').onclick = () => { const c = ensureCtx(); for (let i = 0; i < 3; i++) dink(c.currentTime + .05 + i * cfg.tempo / 1000); };
+  $('openSettings').onclick = () => { $('settings').classList.remove('hidden'); };
+  $('closeSettings').onclick = () => { $('settings').classList.add('hidden'); render(); };
+  $('songFile').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { await idbPut('song', { name:f.name, blob:f }); ensureCtx(); await loadSong(); $('songWarn').classList.add('hidden'); }
+    catch (err) { $('songName').textContent = 'Could not save: ' + err.message; }
+  };
+  $('previewSong').onclick = async () => {
+    ensureCtx(); if (!songBuf) await loadSong(); if (!songBuf) return;
+    stopAll(); cancelled = false; const src = ctx.createBufferSource(); src.buffer = songBuf; src.connect(ctx.destination); src.start(); playing.push(src);
+    timers.push(setTimeout(stopAll, 8000));
+  };
+  $('clearSong').onclick = async () => { await idbDel('song'); songBuf = null; loadSong(); };
+  $('applyMan').onclick = () => { const u = parseInt($('manUh').value, 10), o = parseInt($('manOpp').value, 10);
+    if (isNaN(u)) return; st.manual = { uh:u, opp:isNaN(o) ? (st.opp ?? 0) : o }; saveSt(); render(); };
+  $('clearMan').onclick = () => { st.manual = null; saveSt(); poll(); };
+
+  idbGet('song').then(r => { if (!r) $('songWarn').classList.remove('hidden'); }).catch(() => {});
+})();
+</script>
 </body>
 </html>
