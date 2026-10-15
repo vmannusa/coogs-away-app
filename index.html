@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coogs Away Game Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="cougar-header">
+        <h1>Coogs Away Game Hub</h1>
+    </header>
+    <main>
+        <section class="card pushup-tracker">
+            <h2>Shasta Push-Up Counter</h2>
+            <div class="score-display">
+                <span class="team">HOU: <span id="hou-score">0</span></span>
+                <span class="team">OPP: <span id="opp-score">0</span></span>
+            </div>
+            <div class="pushup-total">
+                <p>Total Push-Ups Today:</p>
+                <h3 id="pushup-count">0</h3>
+            </div>
+        </section>
+        <section class="card traditions">
+            <h2>Traditions</h2>
+            <button id="play-fight-song">Play Fight Song</button>
+            <details>
+                <summary>Alma Mater Lyrics</summary>
+                <p>All hail to thee, our Houston University...</p>
+            </details>
+        </section>
+        <section class="card tailgate-checklist">
+            <h2>Tailgate Operations</h2>
+            <ul id="checklist">
+                <li><input type="checkbox" id="item-trailer"> <label for="item-trailer">Trailer hooked up</label></li>
+                <li><input type="checkbox" id="item-gas"> <label for="item-gas">Gas for generator</label></li>
+                <li><input type="checkbox" id="item-cooler"> <label for="item-cooler">Cooler & Ice</label></li>
+                <li><input type="checkbox" id="item-drinks"> <label for="item-drinks">Root beers & White Claws</label></li>
+                <li><input type="checkbox" id="item-food"> <label for="item-food">Shipley's & Chick-fil-A</label></li>
+            </ul>
+        </section>
+    </main>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
